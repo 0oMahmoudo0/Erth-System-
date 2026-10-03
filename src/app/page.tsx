@@ -15,7 +15,7 @@ export default function Home() {
     }
   }, []);
 
-  const containerVariants = {
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     show: {
       opacity: 1,
@@ -23,12 +23,12 @@ export default function Home() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { y: 50, opacity: 0 },
     show: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100, damping: 15 } }
   };
 
-  const titleVariants = {
+  const titleVariants: any = {
     hidden: { y: "100%" },
     show: { y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
   };

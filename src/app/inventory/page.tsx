@@ -81,7 +81,7 @@ export default async function InventoryPage() {
                   
                   const groupedArray = Object.values(groupedInventory);
 
-                  return groupedArray.map((group) => (
+                  return groupedArray.map((group: any) => (
                     <div key={group.product.id} className="border-2 border-white bg-black flex flex-col">
                       <div className="p-4 md:p-6 border-b-2 border-white flex items-center gap-6 bg-white text-black">
                         {group.product.photo ? (

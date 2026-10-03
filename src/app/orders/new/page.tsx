@@ -5,10 +5,9 @@ import { prisma } from "@/lib/db";
 export const dynamic = 'force-dynamic';
 
 export default async function NewOrderPage() {
-  // Try to fetch dependencies, if DB fails (no tables), return empty arrays to gracefully render
-  let products = [];
-  let inventoryItems = [];
-  let employees = [];
+  let products: any[] = [];
+  let inventoryItems: any[] = [];
+  let employees: any[] = [];
 
   try {
     products = await prisma.product.findMany({ 

@@ -32,7 +32,7 @@ export default async function OrdersDirectoryPage(props: {
     where.status = 'CANCELLED';
   }
 
-  let orders = [];
+  let orders: any[] = [];
   try {
     orders = await prisma.order.findMany({
       where,
