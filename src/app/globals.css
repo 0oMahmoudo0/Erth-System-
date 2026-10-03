@@ -1,26 +1,135 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* DARK THEME (DEFAULT) */
+  --bg-color: #000000;
+  --fg-color: #ffffff;
+  --border-color: #ffffff;
+  --placeholder-color: #555555;
+  --muted-text: #888888;
+}
+
+:root[data-theme="light"] {
+  --bg-color: #ffffff;
+  --fg-color: #000000;
+  --border-color: #000000;
+  --placeholder-color: #aaaaaa;
+  --muted-text: #666666;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-background: var(--bg-color);
+  --color-foreground: var(--fg-color);
+  --font-sans: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --color-accent: var(--fg-color);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-color);
+  color: var(--fg-color);
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   BRUTALIST JJETTAS GLOBAL OVERRIDES
+   ========================================================================== */
+
+/* 1. Force all backgrounds to current theme */
+.bg-white, .bg-neutral-50, .bg-neutral-100, .bg-neutral-900, .bg-black {
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+}
+
+/* 2. Force text colors */
+.text-neutral-900, .text-neutral-800, .text-neutral-700, .text-neutral-600, .text-white, .text-black {
+  color: var(--fg-color) !important;
+}
+.text-neutral-500, .text-neutral-400 {
+  color: var(--muted-text) !important;
+}
+
+/* 3. Brutalist Thick Borders & Hard Edges */
+* {
+  border-radius: 0 !important;
+}
+.border, .border-neutral-200, .border-neutral-300, .border-neutral-100, .border-b, .border-t, .border-l, .border-r, .border-white, .border-black {
+  border-color: var(--border-color) !important;
+}
+.border { border-width: 2px !important; }
+.border-b, .border-t, .border-l, .border-r { border-width: 2px !important; }
+
+/* 4. Form Elements (Inputs, Selects, Textareas) */
+input, select, textarea {
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+  border: 2px solid var(--border-color) !important;
+  padding: 0.75rem !important;
+  font-family: monospace !important;
+  text-transform: uppercase !important;
+  transition: all 0.2s ease;
+}
+input:focus, select:focus, textarea:focus {
+  outline: none !important;
+  background-color: var(--fg-color) !important;
+  color: var(--bg-color) !important;
+}
+input::placeholder, textarea::placeholder {
+  color: var(--placeholder-color) !important;
+}
+
+/* 5. Buttons & Badges */
+button, .bg-blue-600, .bg-blue-500, a.px-6.py-2 {
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+  border: 2px solid var(--border-color) !important;
+  font-weight: 900 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.05em !important;
+  transition: all 0.2s ease !important;
+}
+button:hover, .bg-blue-600:hover, .bg-blue-500:hover, a.px-6.py-2:hover {
+  background-color: var(--fg-color) !important;
+  color: var(--bg-color) !important;
+}
+
+/* Status Badges */
+span.bg-green-50, span.bg-blue-50, span.bg-red-50, span.bg-neutral-100 {
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+  border: 1px solid var(--border-color) !important;
+  font-family: monospace !important;
+}
+
+/* 6. Tables - Aggressive Grid Look */
+table {
+  border: 2px solid var(--border-color) !important;
+  width: 100% !important;
+}
+th {
+  background-color: var(--fg-color) !important;
+  color: var(--bg-color) !important;
+  font-weight: 900 !important;
+  border: 2px solid var(--border-color) !important;
+  padding: 1rem !important;
+}
+td {
+  background-color: var(--bg-color) !important;
+  color: var(--fg-color) !important;
+  border: 1px solid var(--border-color) !important;
+  border-bottom: 2px solid var(--border-color) !important;
+}
+tr:hover td {
+  background-color: var(--fg-color) !important;
+  color: var(--bg-color) !important;
+  cursor: crosshair;
+}
+
+/* 7. Hover effects for links */
+a:not(.group):not(nav a):hover {
+  opacity: 0.7;
+}
+
+/* 8. Fix specific shadows */
+.shadow-sm, .shadow-md, .shadow-lg {
+  box-shadow: none !important;
 }

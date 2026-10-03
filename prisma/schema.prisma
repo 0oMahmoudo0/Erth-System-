@@ -1,0 +1,229 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id       String @id @default(cuid())
+  name     String
+  username String @unique
+  password String
+  createdAt DateTime @default(now())
+}
+
+model Customer {
+  id          String   @id @default(cuid())
+  name        String
+  governorate String
+  address     String
+  phone       String   @unique
+  phone2      String?
+  dateOfBirth String?
+  orders      Order[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Location {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  active         Boolean         @default(true)
+  inventoryItems InventoryItem[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Product {
+  id             String          @id @default(cuid())
+  name           String          @unique
+  category       String?
+  photo          String?
+  cost           Float?
+  active         Boolean         @default(true)
+  inventoryItems InventoryItem[]
+  orders         Order[]
+  movements      InventoryMovement[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model InventoryItem {
+  id                 String     @id @default(cuid())
+  productId          String
+  product            Product    @relation(fields: [productId], references: [id])
+  size               String     @default("")
+  locationId         String
+  location           Location   @relation(fields: [locationId], references: [id])
+  quantity           Int        @default(0)
+  unitCost           Float      @default(0)
+  rawMaterialName    String?
+  active             Boolean    @default(true)
+  orders             Order[]
+  movements          InventoryMovement[]
+  costHistory        InventoryCostHistory[]
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  @@unique([productId, size, locationId])
+}
+
+model InventoryCostHistory {
+  id              String        @id @default(cuid())
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  previousCost    Float
+  newCost         Float
+  reason          String?
+  performedBy     String
+  createdAt       DateTime      @default(now())
+}
+
+model InventoryMovement {
+  id              String        @id @default(cuid())
+  inventoryItemId String
+  inventoryItem   InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  productId       String
+  product         Product       @relation(fields: [productId], references: [id])
+  size            String        @default("")
+  movementType    String        // ADDITION, DEDUCTION, ORDER_DEDUCTION, ORDER_REVERSAL, MANUAL_ADJUSTMENT
+  quantityChange  Int
+  previousQuantity Int
+  newQuantity     Int
+  reason          String
+  note            String?
+  orderId         String?
+  order           Order?        @relation(fields: [orderId], references: [id])
+  performedBy     String
+  createdAt       DateTime      @default(now())
+}
+
+model Order {
+  id                        String   @id @default(cuid())
+  orderNumber               String   @unique
+  customerId                String
+  customer                  Customer @relation(fields: [customerId], references: [id])
+  shipGovernorate           String
+  shipAddress               String
+  transactionDate           DateTime @default(now())
+  productId                 String
+  product                   Product  @relation(fields: [productId], references: [id])
+  size                      String   @default("")
+  quantity                  Int
+  inventoryItemId           String
+  inventoryItem             InventoryItem @relation(fields: [inventoryItemId], references: [id])
+  rawMaterialUnitCost       Float
+  codAmount                 Float    @default(0)
+  printingCost              Float    @default(0)
+  shippingMode              String   // AUTO or MANUAL
+  shippingCost              Float    @default(0)
+  transportationCost        Float    @default(0)
+  deliveryCost              Float    @default(0)
+  advertisingCost           Float    @default(0)
+  advertisingShare          Float    @default(0)
+  callCenterEmployeeId      String?
+  callCenterEmployee        CallCenterEmployee? @relation(fields: [callCenterEmployeeId], references: [id])
+  commissionPercent         Float    @default(0)
+  commissionAmount          Float    @default(0)
+  totalAdditionalExpenses   Float    @default(0)
+  remainingAmount           Float    @default(0)
+  status                    String   // CONFIRMED, PRINTING, RECEIVED_BY_SHIPPING_COMPANY, SHIPPED, DELIVERED, COLLECTED, CANCELLED
+  stockState                String   // DEDUCTED, REVERSED
+  partnershipPlanId         String?
+  partnershipPlan           PartnershipPlan? @relation(fields: [partnershipPlanId], references: [id])
+  partnershipSnapshot       String?  // JSON snapshot
+  
+  shippingCompany           String?
+  trackingCode              String?
+  companyPlanRoute          String?
+  collectionAccountId       String?
+  collectionAccount         PaymentAccount? @relation(fields: [collectionAccountId], references: [id])
+  paidAmount                Float    @default(0)
+  profit                    Float?
+  loss                      Float?
+
+  createdBy                 String
+  createdAt                 DateTime @default(now())
+  cancelledAt               DateTime?
+
+  deposits                  OrderDeposit[]
+  movements                 InventoryMovement[]
+}
+
+model OrderDeposit {
+  id               String         @id @default(cuid())
+  orderId          String
+  order            Order          @relation(fields: [orderId], references: [id])
+  amount           Float
+  transactionDate  DateTime       @default(now())
+  paymentAccountId String
+  paymentAccount   PaymentAccount @relation(fields: [paymentAccountId], references: [id])
+  createdAt        DateTime       @default(now())
+}
+
+model CallCenterEmployee {
+  id                String   @id @default(cuid())
+  name              String
+  commissionPercent Float    @default(0)
+  active            Boolean  @default(true)
+  orders            Order[]
+  createdAt         DateTime @default(now())
+}
+
+model PaymentAccount {
+  id               String   @id @default(cuid())
+  code             String   @unique
+  name             String
+  active           Boolean  @default(true)
+  sortOrder        Int      @default(0)
+  manualBalance    Float    @default(0)
+  deposits         OrderDeposit[]
+  orders           Order[]
+  createdAt        DateTime @default(now())
+}
+
+model ShippingRate {
+  governorate String   @id
+  rate        Float
+  updatedAt   DateTime @updatedAt
+}
+
+model Partner {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  memberships PlanMember[]
+  createdAt   DateTime     @default(now())
+}
+
+model PartnershipPlan {
+  id          String       @id @default(cuid())
+  name        String       @unique
+  description String?
+  isActive    Boolean      @default(true)
+  isDefault   Boolean      @default(false)
+  members     PlanMember[]
+  orders      Order[]
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+}
+
+model PlanMember {
+  id                 String          @id @default(cuid())
+  partnerId          String
+  partner            Partner         @relation(fields: [partnerId], references: [id])
+  planId             String
+  plan               PartnershipPlan @relation(fields: [planId], references: [id])
+  profitPercentage   Float
+  contributionAmount Float
+  createdAt          DateTime        @default(now())
+
+  @@unique([partnerId, planId])
+}
