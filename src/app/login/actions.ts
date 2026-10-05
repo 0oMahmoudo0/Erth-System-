@@ -1,5 +1,6 @@
 "use server";
 import { prisma } from "@/lib/db";
+import { friendlyDbError } from "@/lib/db-errors";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -22,18 +23,21 @@ export async function loginOrRegister(prevState: any, formData: FormData) {
       (await cookies()).set("auth_user", user.name, { path: "/" });
       (await cookies()).set("show_splash", user.name, { path: "/" });
     } catch (e: any) {
-      if (e.code === 'P2002') return { error: "Username already taken." };
-      console.error(e);
-      return { error: `Registration failed: ${e.message || String(e)}` };
+      if (e?.code === 'P2002') return { error: "Username already taken." };
+      return { error: friendlyDbError(e, "register") };
     }
   } else {
     // Login
-    const user = await prisma.user.findUnique({ where: { username } });
-    if (!user || user.password !== password) {
-      return { error: "Invalid username or password." };
+    try {
+      const user = await prisma.user.findUnique({ where: { username } });
+      if (!user || user.password !== password) {
+        return { error: "Invalid username or password." };
+      }
+      (await cookies()).set("auth_user", user.name, { path: "/" });
+      (await cookies()).set("show_splash", user.name, { path: "/" });
+    } catch (e) {
+      return { error: friendlyDbError(e, "login") };
     }
-    (await cookies()).set("auth_user", user.name, { path: "/" });
-    (await cookies()).set("show_splash", user.name, { path: "/" });
   }
 
   redirect("/");
